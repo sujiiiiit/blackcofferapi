@@ -5,7 +5,6 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/index.ts",
-    "dev": "nodemon src/index.ts",
     "build": "tsc",
     "vercel-build": "echo hello"
   },
