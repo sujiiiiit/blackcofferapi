@@ -45,7 +45,7 @@ const db = client.db("expense-tracker");
 const expenseCollection = db.collection("jsondata");
 
 // Search Articles with filters and pagination
-app.get("/search", async (req: Request, res: Response) => {
+app.get("/api/search", async (req: Request, res: Response) => {
   const { end_year, intensity, sector, topic, region, start_year, country, relevance, pestle, source, likelihood, start_date, end_date, page = 1, limit = 1000 } = req.query;
 
   const filters: any = {};
@@ -100,7 +100,7 @@ app.get("/search", async (req: Request, res: Response) => {
 });
 
 // Get expense by ID
-app.get("/search/:id", async (req: Request, res: Response) => {
+app.get("/api/search/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
