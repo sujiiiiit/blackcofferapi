@@ -46,6 +46,8 @@ const expenseCollection = db.collection("jsondata");
 
 // Search Articles with filters and pagination
 app.get("/api/search", async (req: Request, res: Response) => {
+
+  try{
   const { end_year, intensity, sector, topic, region, start_year, country, relevance, pestle, source, likelihood, start_date, end_date, page = 1, limit = 1000 } = req.query;
 
   const filters: any = {};
@@ -85,7 +87,7 @@ app.get("/api/search", async (req: Request, res: Response) => {
   const limitNum = parseInt(limit as string);
   const skip = (pageNum - 1) * limitNum;
 
-  try {
+ 
     const total = await expenseCollection.countDocuments(filters);
     const articles = await expenseCollection.find(filters).skip(skip).limit(limitNum).toArray();
 
