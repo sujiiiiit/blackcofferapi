@@ -46,48 +46,71 @@ const expenseCollection = db.collection("jsondata");
 
 // Search Articles with filters and pagination
 app.get("/api/search", async (req: Request, res: Response) => {
+  try {
+    const {
+      query,
+      end_year,
+      intensity,
+      sector,
+      topic,
+      region,
+      start_year,
+      country,
+      relevance,
+      pestle,
+      source,
+      likelihood,
+      start_date,
+      end_date,
+      page = 1,
+      limit = 20,
+    } = req.query;
 
-  try{
-  const { end_year, intensity, sector, topic, region, start_year, country, relevance, pestle, source, likelihood, start_date, end_date, page = 1, limit = 1000 } = req.query;
+    const filters: any = {};
 
-  const filters: any = {};
-
-  if (end_year) filters.end_year = end_year;
-  if (intensity) filters.intensity = parseInt(intensity as string);
-  if (sector) filters.sector = sector;
-  if (topic) filters.topic = topic;
-  if (region) filters.region = region;
-  if (start_year) filters.start_year = start_year;
-  if (country) filters.country = country;
-  if (relevance) filters.relevance = parseInt(relevance as string);
-  if (pestle) filters.pestle = pestle;
-  if (source) filters.source = source;
-  if (likelihood) filters.likelihood = parseInt(likelihood as string);
-
-  // Date range filtering
-  if (start_date || end_date) {
-    filters.added = {};
-    filters.published = {};
-
-    if (start_date) {
-      filters.added.$gte = new Date(start_date as string);
-      filters.published.$gte = new Date(start_date as string);
+    if (query) {
+      filters.title = { $regex: new RegExp(query as string, "i") };
     }
-    if (end_date) {
-      filters.added.$lte = new Date(end_date as string);
-      filters.published.$lte = new Date(end_date as string);
+    if (end_year && typeof(end_year) === "string") {
+      const parsedEndYear = parseInt(end_year);
+      filters.end_year = parsedEndYear;
+    }
+    if (intensity) {
+      filters.intensity = parseInt(intensity as string);
+    }
+    if (sector) filters.sector = sector;
+    if (topic) filters.topic = topic;
+    if (region) filters.region = region;
+    if (start_year) filters.start_year = start_year;
+    if (country) filters.country = country;
+    if (relevance) filters.relevance = parseInt(relevance as string);
+    if (pestle) filters.pestle = pestle;
+    if (source) filters.source = source;
+    if (likelihood) filters.likelihood = parseInt(likelihood as string);
+
+    // Date range filtering
+    if (start_date || end_date) {
+      filters.added = {};
+      filters.published = {};
+
+      if (start_date) {
+        filters.added.$gte = new Date(start_date as string);
+        filters.published.$gte = new Date(start_date as string);
+      }
+      if (end_date) {
+        filters.added.$lte = new Date(end_date as string);
+        filters.published.$lte = new Date(end_date as string);
+      }
+
+      // Clean up filters if not both date filters are applied
+      if (!filters.added.$gte && !filters.added.$lte) delete filters.added;
+      if (!filters.published.$gte && !filters.published.$lte) delete filters.published;
     }
 
-    // Clean up filters if not both date filters are applied
-    if (!filters.added.$gte && !filters.added.$lte) delete filters.added;
-    if (!filters.published.$gte && !filters.published.$lte) delete filters.published;
-  }
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
 
-  const pageNum = parseInt(page as string);
-  const limitNum = parseInt(limit as string);
-  const skip = (pageNum - 1) * limitNum;
-
- 
     const total = await expenseCollection.countDocuments(filters);
     const articles = await expenseCollection.find(filters).skip(skip).limit(limitNum).toArray();
 
@@ -117,6 +140,5 @@ app.get("/api/search/:id", async (req: Request, res: Response) => {
     res.status(500).json({ error: "An error occurred while fetching the expense" });
   }
 });
-
 
 export default app;
